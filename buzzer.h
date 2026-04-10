@@ -3,7 +3,7 @@
 
 #include <avr/io.h>
 
-// Buzzer pin config
+// Buzzer Macros
 #define BUZZER_DDR  DDRB
 #define BUZZER_PORT PORTB
 #define BUZZER_PIN  PB5
