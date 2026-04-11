@@ -1,28 +1,33 @@
-// LCD Interface:
-// GND = R/W 
-// PC5 = RS
-// PC4 = E
-// PD7:0 = D7:0
-
 #ifndef LCD_H
 #define LCD_H
 
-#include <avr/io.h>
+#include <stdint.h>
 
-// LCD ports
-#define LCD_DPRT PORTD
-#define LCD_DDDR DDRD
+// I2C LCD address (PCF8574 chip)
+#define LCD_ADDR 0x27
 
-#define LCD_CPRT PORTC
-#define LCD_CDDR DDRC
+// LCD Control bits (PCF8574 pins)
+#define LCD_RS 0
+#define LCD_RW 1
+#define LCD_EN 2
+#define LCD_BL 3   // backlight
 
-#define LCD_RS 5
-#define LCD_EN 4
+// I2C functions
+void i2c_init(void);
+void i2c_start(void);
+void i2c_stop(void);
+void i2c_write(uint8_t data);
 
-void lcdCommanda(unsigned char cmnd);
-void lcdData(unsigned char data);
-void lcd_init();
-void lcd_gotoxy(unsigned char x, unsigned char y);
-void lcd_print(unsigned char * str);
+// LCD helper functions
+void lcd_expander_write(uint8_t data);
+void lcd_pulse(uint8_t data);
+void lcd_write4(uint8_t nibble, uint8_t mode);
+void lcd_send(uint8_t value, uint8_t mode);
+
+// LCD high-level
+void lcd_commanda(unsigned char cmd);
+void lcd_data(uint8_t data);
+void lcd_init(void);
+void lcd_print(unsigned char *str);
 
 #endif
