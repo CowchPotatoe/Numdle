@@ -13,11 +13,14 @@
 #include "keypad.h"
 #include "buzzer.h"
 
-void initTimer();
 //Number of equations to pull form
 #define NUM_EQUATIONS 5
-//Function prototype
-void checkGuess(unsigned char *guess, unsigned char *equation);
+
+//Function prototypes
+void initTimer();
+int checkGuess(unsigned char *guess, unsigned char *equation);
+
+// Variables and arrays:
 // store user guess
 unsigned char guess[6];
 // store correct equation
@@ -31,7 +34,11 @@ unsigned char randEq[NUM_EQUATIONS][6] = {
 //store answers corresponding to the equations
 int answers[NUM_EQUATIONS] = {12, 5, -33, 72, 20};
 // number of attempts to guess equation
-int numAttempts = 5;
+int attempts = 0;
+// store guess history (5 attempts × 6 chars)
+unsigned char guessHistory[5][6];
+// boolean for game over status
+int gameOver = 0;
 
 int main(void) {
 	unsigned char pressedKey;
@@ -39,6 +46,11 @@ int main(void) {
 	unsigned char start2[] = "GuessTheEquation";
 	unsigned char randNum[] = "Number:";
 	unsigned char next[] = "Next Guess";
+	unsigned char win[] = "YOU WIN!!!";
+	unsigned char lose[] = "Incorrect";
+	unsigned char correct[] = "Correct Eq:";
+	int match = 0;
+
 	
 	// initialize components
 	initKeypadIO();
@@ -87,25 +99,76 @@ int main(void) {
             debounce();
             pressedKey = identifyPressedKey();
         } while (pressedKey != '=');
-        // Check the guess
-		checkGuess(guess, randEq[eqIndex]);
-        // Wait for button press before
-        checkAnyKeyPressed();
-        debounce();
-        identifyPressedKey();
-        // clear screen
-        lcdCommanda(0x01);
-        _delay_ms(2);
-        lcd_gotoxy(1,1);
-        lcd_print(next);
+		
+		// store guess in history
+		for (int i = 0; i < 6; i++) {
+			guessHistory[attempts][i] = guess[i];
+		}
+		// check guess
+		match = checkGuess(guess, randEq[eqIndex]);
+		// increments guess
+		if (match==1) {
+			lcdCommanda(0x01);
+			_delay_ms(2);
+			lcd_gotoxy(1,1);
+			lcd_print(win);
+			buzzer_win();
+			gameOver = 1;
+		} 
+		else {
+			lcdCommanda(0x01);
+			_delay_ms(2);
+			lcd_gotoxy(1,1);
+			lcd_print(lose);
+			// show correct equation (debug)
+			lcd_gotoxy(1,2);
+			for(int i = 0; i < 6; i++){
+				lcdData(randEq[eqIndex][i]);
+			}
+			buzzer_error();
+			attempts++;
+			// wait for button click
+			checkAnyKeyPressed();
+			debounce();
+			pressedKey = identifyPressedKey();
+			// next guess
+			lcdCommanda(0x01);
+			_delay_ms(800);
+			lcd_gotoxy(1, 1);
+			lcd_print(next);
+		}
+
+		// out of attempts
+		if (attempts >= 5 && !match){
+			lcdCommanda(0x01);
+			lcd_gotoxy(1, 1);
+			lcd_print(correct);
+			lcd_gotoxy(1, 2);
+			for (int i = 0; i < 6; i++) {
+				lcdData(randEq[eqIndex][i]);
+			}
+			buzzer_error();
+			gameOver = 1;
+		}
+		// game over
+		if (gameOver) {
+			checkAnyKeyPressed();
+			debounce();
+			pressedKey = identifyPressedKey();
+			// Reset GAME
+			attempts = 0;
+			gameOver = 0;
+			// pick new equation
+			eqIndex = (TCNT0^pressedKey) % NUM_EQUATIONS;
+			lcdCommanda(0x01);
+			_delay_ms(800);
+		}
 	}
 	return 0;
 }
 
 // Checks user guess against the correct equation
-void checkGuess(unsigned char *guess, unsigned char *equation) {
-	unsigned char correct[] = "Correct";
-	unsigned char incorrect[] = "Incorrect";
+int checkGuess(unsigned char *guess, unsigned char *equation) {
 	// Returns 1 if the guess is correct, 0 otherwise
 	int match = 1;
     for(int i = 0; i < 6; i++){
@@ -114,27 +177,7 @@ void checkGuess(unsigned char *guess, unsigned char *equation) {
 			break;
         } 
     }
-	// Tells user the inputted equation is incorrect
-	if (match == 0){
-		lcdCommanda(0x01);
-		_delay_ms(2);
-		lcd_gotoxy(1,1);
-		lcd_print(incorrect);  
-		
-		// show correct equation (debug)
-		lcd_gotoxy(1,2);
-		for(int i = 0; i < 6; i++){
-			lcdData(equation[i]);
-		}
-		buzzer_error();
-	} else{ // Tells user inputted equation is correct
-		lcdCommanda(0x01);
-		_delay_ms(2);
-		lcd_gotoxy(1,1);
-		lcd_print(correct);
-		buzzer_win();
-	}
-    _delay_ms(300);
+	return match;
 }
 
 // Used for randomness
