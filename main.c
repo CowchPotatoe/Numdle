@@ -56,18 +56,13 @@ int main(void) {
 	lcd_gotoxy(1,1);
 	lcd_print(randNum);
 	
+	// index used for equation
+	int eqIndex = 0;
+
+	// use timer value as random number
+	eqIndex = TCNT0 % NUM_EQUATIONS;
+
 	while(1){
-		// index used for equation
-		int eqIndex = 0;
-
-		// wait for a key press (user timing = randomness)
-		checkAnyKeyPressed();
-		debounce();
-		pressedKey = identifyPressedKey();
-
-		// use timer value as random number
-		eqIndex = (TCNT0+pressedKey) % NUM_EQUATIONS;
-		
 		// Collect exactly 6 inputs
         for(int i = 0; i < 6; i++){
 			// takes input
@@ -120,13 +115,14 @@ void checkGuess(unsigned char *guess, unsigned char *equation) {
 		_delay_ms(2);
 		lcd_gotoxy(1,1);
 		lcd_print(incorrect);  
+		
 		// show correct equation (debug)
 		lcd_gotoxy(1,2);
-
 		for(int i = 0; i < 6; i++){
 			lcdData(equation[i]);
 		}
 		_delay_ms(1500);
+
 		buzzer_error();
 	} else{ // Tells user inputted equation is correct
 		lcdCommanda(0x01);
@@ -143,5 +139,5 @@ void initTimer(){
 	TCNT0 = 0; // load timer0 = 0
 	TCCR0A = 0; // Timer0: normal mode, internal clock
 	// TCCR0B = 1; // Timer0: enabled, no prescaler
-	TCCR0B = (1 << CS00); // Timer0: enabled, no prescaler
+	TCCR0B = (1 << CS02) | (1 << CS00); // prescaler = 1024
 }
