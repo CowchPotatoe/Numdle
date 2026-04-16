@@ -95,7 +95,7 @@ int main(void) {
 
 	// display answer on LCD
 	lcd_gotoxy(9,1); // position after "Number:"
-	lcd_print(answerStr);
+	lcd_print((unsigned char*)answerStr);
 
 	while(1){
 		// get equation from keypad
@@ -240,7 +240,7 @@ void resetGame() {
 
 	// display answer on LCD
 	lcd_gotoxy(9,1); // position after "Number:"
-	lcd_print(answerStr);
+	lcd_print((unsigned char*)answerStr);
 
 	_delay_ms(800);
 	
