@@ -132,7 +132,11 @@ void getUserInput(void) {
 			firstInput = 1;
 			continue;
 		}
-
+		
+		if (pressedKey == '=') {
+			break;
+		}
+		
         // backspace handling
         if (pressedKey == '_') {
             if (i > 0) {
@@ -146,8 +150,9 @@ void getUserInput(void) {
             }
             continue;
         }
+		
 		// Don't store any inputs beyond 6 chars
-		if (i != 6) {
+		if (i < 6) {
 			// store input
 			guess[i] = pressedKey;
 
@@ -160,12 +165,6 @@ void getUserInput(void) {
 		}
 
     }
-    // wait for '=' before continuing
-    do {
-        checkAnyKeyPressed();
-        debounce();
-        pressedKey = identifyPressedKey();
-    } while (pressedKey != '=');
 }
 
 // stores the guess for each attempt
@@ -224,7 +223,7 @@ void result() {
 		lcdCommanda(0x01);
 		_delay_ms(2);
 		lcd_gotoxy(1,1);
-		// show the number to quess
+		// show the number to guess
 		lcd_print(num);
 		// convert answer to string
 		itoa(answers[eqIndex], answerStr, 10);
