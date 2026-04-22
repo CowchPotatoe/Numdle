@@ -121,8 +121,8 @@ void getUserInput(void) {
 
     int i = 0;
 	int firstInput = 0;
-	// only receive 6 inputs
-    while (i < 6) {
+	// only receive 6 inputs or 7 if it is a backspace
+    while (i < 7) {
         checkAnyKeyPressed();
         debounce();
         pressedKey = identifyPressedKey();
@@ -146,16 +146,19 @@ void getUserInput(void) {
             }
             continue;
         }
+		// Don't store any inputs beyond 6 chars
+		if (i != 6) {
+			// store input
+			guess[i] = pressedKey;
 
-        // store input
-        guess[i] = pressedKey;
+			// display input
+			lcd_gotoxy(i + 4, 2);
+			lcdData(pressedKey);
+			// update index
+			i++;
+			_delay_ms(100);
+		}
 
-		// display input
-        lcd_gotoxy(i + 4, 2);
-        lcdData(pressedKey);
-		// update index
-        i++;
-        _delay_ms(100);
     }
     // wait for '=' before continuing
     do {
