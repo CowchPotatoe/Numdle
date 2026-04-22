@@ -120,12 +120,18 @@ int main(void) {
 void getUserInput(void) {
 
     int i = 0;
+	int firstInput = 0;
 	// only receive 6 inputs
     while (i < 6) {
         checkAnyKeyPressed();
         debounce();
         pressedKey = identifyPressedKey();
 		
+		if (attempts == 0 && i == 0 && firstInput == 0) {
+			// discard first input after intro screen
+			firstInput = 1;
+			continue;
+		}
 
         // backspace handling
         if (pressedKey == '_') {
