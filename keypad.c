@@ -92,7 +92,7 @@ unsigned char identifyPressedKey() {
 		case 0x0D:		column = 1; break;
 		case 0x0B:		column = 2; break;
 		case 0x07:		column = 3; break;
-		default:		column = 0;
+		default:		return 1;
 	}
 	// Return value of key pressed
 	return keypad[row][column];

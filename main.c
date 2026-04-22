@@ -118,7 +118,6 @@ int main(void) {
 
 // takes keypad as user input
 void getUserInput(void) {
-
     int i = 0;
 	int firstInput = 0;
 	// only receive 6 inputs or 7 if it is a backspace
@@ -126,6 +125,8 @@ void getUserInput(void) {
         checkAnyKeyPressed();
         debounce();
         pressedKey = identifyPressedKey();
+		// debounce, ignore input if fail
+		if (pressedKey == 1) continue;
 		
 		if (attempts == 0 && i == 0 && firstInput == 0) {
 			// discard first input after intro screen
