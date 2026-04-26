@@ -26,6 +26,7 @@
 void initTimer();
 void initEncoder();
 void scrollHistory(int direction);
+void restoreLCD();
 void getUserInput();
 void storeGuess();
 void result();
@@ -135,7 +136,12 @@ void getUserInput(void) {
 	int firstInput = 0;
 	// only receive 6 inputs or 7 if it is a backspace
     while (i < 7) {
-        checkAnyKeyPressed();
+		// check is a blocking function that ret 1 if scrolling
+        if (checkAnyKeyPressed() == -1) {
+			// Restore the LCD after we are done scrolling
+			restoreLCD();
+			continue;
+		}
         debounce();
         pressedKey = identifyPressedKey();
 		// debounce, ignore input if fail
@@ -230,7 +236,9 @@ void result() {
 	// Show next prompt if player still has attempts left
 	if (attempts < 5) {
 		// wait for button press
-		checkAnyKeyPressed();
+		if (checkAnyKeyPressed() == -1) {
+			restoreLCD();
+		}
 		debounce();
 		pressedKey = identifyPressedKey();
 		// clear screen and as for next guess
@@ -258,7 +266,7 @@ void result() {
 void gamePlay() {
 	unsigned char correct[] = "Correct Eq:";
 	// wait for user input
-	checkAnyKeyPressed();
+	if (checkAnyKeyPressed() == -1) restoreLCD();
 	debounce();
 	pressedKey = identifyPressedKey();
 	// if player used all attempts and failed
@@ -426,4 +434,29 @@ void initEncoder() {
 
 	// Enable interrupts
     sei();
+}
+
+void restoreLCD() {
+	unsigned char num[] = "Number: ";
+	lcdCommanda(0x01);
+	_delay_ms(2);
+	lcd_gotoxy(1,1);
+	lcd_print(num);
+
+	lcd_gotoxy(9, 1);
+	// show the number to guess
+	// convert answer to string
+	itoa(answers[eqIndex], answerStr, 10);
+
+	// display answer on LCD
+	lcd_gotoxy(9,1); // position after "Number:"
+	lcd_print((unsigned char*)answerStr);
+	
+	lcd_gotoxy(1,2);
+	// Print attempt number
+	lcdData((attempts + 1) + '0');
+	lcdData('.');
+	lcdData(' ');
+	
+
 }
