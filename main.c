@@ -228,8 +228,19 @@ void result() {
 
 	// debug purpose, show current equation
 	lcd_gotoxy(1,2);
+	/*
 	for (int i = 0; i < 6; i++) {
 		lcdData(randEq[eqIndex][i]);
+	}
+	*/
+	
+	// Show Correct
+	for (int i = 0; i < 6; i ++) {
+		if (guess[i] == randEq[eqIndex][i]) {
+			lcdData(guess[i]);
+		} else {
+			lcdData('_');
+		}
 	}
 
 	buzzer_error();
