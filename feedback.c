@@ -1,24 +1,28 @@
 #define F_CPU 16000000UL
 #include <avr/io.h>
 #include <util/delay.h>
-#include "buzzer.h"
+#include "feedback.h"
 
 // Initialize Timer1 PWM on OC1A (PB1)
-void buzzer_init() {
+void feedback_init() {
 	// OC1A pin as output
-	DDRB |= (1 << PB1);   
+	DDRB |= (1 << PB1);
+	// LED pins as output (PD4, PD5)
+	DDRD |= (1 << LED_RED) | (1 << LED_BLUE);
+	// Turn LEDs off initially
+	PORTD &= ~((1 << LED_RED) | (1 << LED_BLUE));
 	// Non-inverted PWM on OC1A + Fast PWM mode
 	TCCR1A |= (1 << COM1A1) | (1 << WGM11);
     // Fast PWM (ICR1 as TOP)
-	TCCR1B |= (1 << WGM13) | (1 << WGM12);   
+	TCCR1B |= (1 << WGM13) | (1 << WGM12);
 	// Initialize counter
-	TCNT1 = 0;  
+	TCNT1 = 0;
 	// Initially buzzer off
-    buzzer_off();
+    feedback_off();
 }
 
 // Set tone frequency
-void buzzer_tone(unsigned int freq) {
+void feedback_tone(unsigned int freq) {
 	if (freq == 0) return;
 	//TOP = (F_CPU / (N * freq)) - 1
 	// F_CPU = system clock (16 MHz)
@@ -32,28 +36,33 @@ void buzzer_tone(unsigned int freq) {
 }
 
 // Turn buzzer off
-void buzzer_off() {
+void feedback_off() {
 	// stop timer
 	TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
 	// turn output low
 	PORTB &= ~(1 << PB1);
 }
 
-void buzzer_error(void) {
+void feedback_error(void) {
 	// Descending tone 
 	for (int freq = 1200; freq >= 400; freq -= 50) {
-		buzzer_tone(freq);
+		PORTD ^= (1 << LED_RED);
+		feedback_tone(freq);
 		_delay_ms(40);
 	}
-	buzzer_off();
+	feedback_off();
+	PORTD &= ~(1 << LED_RED);
 }
 
-void buzzer_win() {
+void feedback_win() {
 	for (int i = 0; i < 6; i++) {
-		buzzer_tone(1400);
+		PORTD ^= (1 << LED_BLUE);
+		feedback_tone(1400);
 		_delay_ms(60);
-		buzzer_tone(900);
+		PORTD ^= (1 << LED_BLUE);
+		feedback_tone(900);
 		_delay_ms(60);
 	}
-	buzzer_off();
+	feedback_off();
+	PORTD &= ~(1 << LED_BLUE);
 }

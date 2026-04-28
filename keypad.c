@@ -10,7 +10,7 @@ extern volatile int historyViewIndex;
 void initKeypadIO() {
 	KEY_RDDR |= 0x0F;	// PB3:0 = outputs (drive rows)
 	KEY_CDDR &= 0xF0;	// PC3:0 = inputs (read columns)
-	KEY_RPORT = 0x0F;	// Drive rows to 1
+	KEY_RPORT |= 0x0F;	// Drive rows to 1
 	KEY_CPORT = 0x0F;	// Set pull-up resistors on columns (PC3:0)
 }
 
@@ -19,8 +19,8 @@ int checkAnyKeyPressed() {
 	
 	// Loop until a key is pressed
 	do {
-		// Ground all rows
-		KEY_RPORT = 0xF0; // PB0-PB3 = 0, PB4-PB7 = 1 
+		// PB0-PB3 = 0, PB4-PB7 = 1
+		KEY_RPORT = (KEY_RPORT & 0xF0) | 0x00;
 		anyKeyPressed = KEY_COLSREAD & 0x0F;
 	} while (anyKeyPressed == 0x0F);
 	
@@ -53,7 +53,7 @@ unsigned char identifyPressedKey() {
 	// Check each row till find pressed key
 	if (!found) {
 		// Ground row 0
-		KEY_RPORT = 0x0E;
+		KEY_RPORT = (KEY_RPORT & 0xF0) | 0x0E;
 		_delay_ms(20);
 		column = KEY_COLSREAD & 0xF;
 		
@@ -65,7 +65,7 @@ unsigned char identifyPressedKey() {
 	
 	if (!found) {
 		// Ground row 1
-		KEY_RPORT = 0x0D;
+		KEY_RPORT = (KEY_RPORT & 0xF0) | 0x0D;
 		_delay_ms(20);
 		column = KEY_COLSREAD & 0xF;
 		
@@ -77,7 +77,7 @@ unsigned char identifyPressedKey() {
 
 	if (!found) {
 		// Ground row 2
-		KEY_RPORT = 0x0B;
+		KEY_RPORT = (KEY_RPORT & 0xF0) | 0x0B;
 		_delay_ms(20);
 		column = KEY_COLSREAD & 0xF;
 		if (column != 0xF) {
@@ -88,7 +88,7 @@ unsigned char identifyPressedKey() {
 
 	if (!found) {
 		// Ground row 3
-		KEY_RPORT = 0x07;
+		KEY_RPORT = (KEY_RPORT & 0xF0) | 0x07;
 		_delay_ms(20);
 		column = KEY_COLSREAD & 0xF;
 		if (column != 0xF) {

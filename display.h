@@ -1,5 +1,8 @@
-#ifndef LCD_H
-#define LCD_H
+#ifndef DISPLAY_H
+#define DISPLAY_H
+
+#include <avr/io.h>
+#include <stdint.h>
 
 /*
 https://www.mikrocontroller.net/attachment/521754/PCF8574_I2C_LCD_Cir_En.pdf
@@ -10,9 +13,6 @@ P2   -> EN
 P3   -> BL-   # 1 for on, 0 for off
 P4-7 -> DB7-4 # We must use 4-bit mode
 */
-
-// i2c needed for lcd
-#include "i2c.h"
 
 // I2C LCD address (PCF8574 chip)
 #define LCD_ADDR 0x27
@@ -26,6 +26,12 @@ P4-7 -> DB7-4 # We must use 4-bit mode
 #define RS 0 // LCD RS
 #define RW 1 // LCD RW
 #define E  2 // LCD EN
+
+// I2C functions
+void i2c_init(void);
+void i2c_start(void);
+void i2c_stop(void);
+void i2c_write(uint8_t data);
 
 // LCD helper functions
 void lcd_expander_write(uint8_t data);

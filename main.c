@@ -10,10 +10,9 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
-#include "i2c.h"
-#include "lcd.h"
+#include "display.h"
 #include "keypad.h"
-#include "buzzer.h"
+#include "feedback.h"
 
 //Rotary encoder PINS
 #define ENC_CLK PD6
@@ -72,7 +71,7 @@ volatile int wasScrolling = 0;
 
 // main function
 int main(void) {
-	unsigned char start1[] = "Numdle1:";
+	unsigned char start1[] = "Numdle:";
 	unsigned char start2[] = "GuessTheEquation";
 	unsigned char randNum[] = "Number:";
 	
@@ -81,7 +80,7 @@ int main(void) {
 	initEncoder();
 	i2c_init();
 	lcd_init();
-	buzzer_init();
+	feedback_init();
 	initTimer();
 
 	// display starting text
@@ -210,7 +209,7 @@ void result() {
 		_delay_ms(2);
 		lcd_gotoxy(1,1);
 		lcd_print(win);
-		buzzer_win();
+		feedback_win();
 		// game over
 		gameOver = 1;
 		return;
@@ -245,7 +244,7 @@ void result() {
 	lcdData('=');
 	lcd_print((unsigned char*)answerStr);
 
-	buzzer_error();
+	feedback_error();
 	// Show next prompt if player still has attempts left
 	if (attempts < 5) {
 		// wait for button press
@@ -293,7 +292,7 @@ void gamePlay() {
 		for (int i = 0; i < 6; i++) {
 			lcdData(randEq[eqIndex][i]);
 		}
-		buzzer_error();
+		feedback_error();
 		gameOver = 1;
 	}
 	// if game ended, wait and reset
@@ -470,6 +469,4 @@ void restoreLCD() {
 	lcdData((attempts + 1) + '0');
 	lcdData('.');
 	lcdData(' ');
-	
-
 }
